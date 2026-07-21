@@ -1,0 +1,9 @@
+{
+    "genotype_path": "/mnt/data_80T/anywaycheng/GA/Data/All_chr.GT.parquet",
+    "predict_expr_path": "/mnt/data_80T/anywaycheng/GA/Data/V7_Array_Genotyped.txt",
+    "real_expr_path": "/mnt/data_80T/anywaycheng/GA/Data/Final_Residual_Expression.csv",
+    "allele_freq_path": "/mnt/data_80T/anywaycheng/GA/Data/rsid_per_population_with_AF.tsv",
+    "annotation_path": "/mnt/data_80T/anywaycheng/GA/Data/EsembleAnnotation.txt",
+    "db_path": "/mnt/data_80T/anywaycheng/GA/Data/gtex_v7_Lung_imputed_europeans_tw_0.5_signif.db",
+    "out_dir": "/mnt/data_80T/anywaycheng/GA/Testing/Simulation/"
+}
