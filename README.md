@@ -27,34 +27,36 @@ PrediXcan 模型以 EUR 族群的 GWAS/eQTL 資料訓練。直接套用到 EAS �
 ## 🗂️ Repository Structure / 專案結構
 
 ```
-GA_and_Simu_Program/            (repo root)
-├── GA.py                       # Main GA calibration engine (GPU, V4)
-├── GA_pipeline.sh              # Batch runner for GA (LOOCV / K-Fold × Sign / Unsign)
-├── GA_Simulation.py            # Simulation validation script
-├── Simu_pipeline.sh            # Grid-search batch runner for simulation
-├── simu_config.json            # Config template for simulation
-├── BuildDB.py                  # Post-processing: merge CSVs → SQLite weight DB
-├── GeneExpression_Predict.py   # Downstream prediction script (VCF → predicted expression)
-├── GeneExpression_Predict.sh   # Prediction pipeline entry point
-├── GA.md                       # Detailed documentation for GA.py
-├── Simulation.md               # Detailed documentation for GA_Simulation.py
-├── BuildDB.md                  # Detailed documentation for BuildDB.py
-├── GeneExpression_Predict.md   # Detailed documentation for prediction pipeline
-├── README.md                   # This file
+(repo root)
+├── README.md                          # This file
 │
-├── PredictTesting/             # Test prediction results (see below)
+├── GA_and_Simu_Program/                # All scripts and per-module docs
+│   ├── GA.py                           # Main GA calibration engine (GPU, V4)
+│   ├── GA_pipeline.sh                  # Batch runner for GA (LOOCV / K-Fold × Sign / Unsign)
+│   ├── GA_Simulation.py                # Simulation validation script
+│   ├── Simu_pipeline.sh                # Grid-search batch runner for simulation
+│   ├── simu_config.json                # Config template for simulation
+│   ├── BuildDB.py                      # Post-processing: merge CSVs → SQLite weight DB
+│   ├── GeneExpression_Predict.py       # Downstream prediction script (VCF → predicted expression)
+│   ├── GeneExpression_Predict.sh       # Prediction pipeline entry point
+│   ├── GA.md / GA.en.md                # Detailed documentation for GA.py (zh / en)
+│   ├── Simulation.md / Simulation.en.md            # Detailed documentation for GA_Simulation.py (zh / en)
+│   ├── BuildDB.md / BuildDB.en.md                  # Detailed documentation for BuildDB.py (zh / en)
+│   └── GeneExpression_Predict.md / .en.md          # Detailed documentation for prediction pipeline (zh / en)
+│
+├── PredictTesting/                     # Test prediction results (see below)
 │   ├── predicted_predicted_expression.csv
 │   └── predicted_summary.csv
 │
 └── data/
-    └── README.md                # Notes on large data files stored on server
+    └── README.md                       # Notes on large data files stored on server
 ```
 
 ---
 
 ## 🔬 Module Descriptions / 模組說明
 
-### 1. `GA.py` — Core GA Engine / 核心 GA 引擎
+### 1. `GA_and_Simu_Program/GA.py` — Core GA Engine / 核心 GA 引擎
 
 The main calibration program. Uses CuPy + Numba CUDA for GPU-parallelized 3-phase GA optimization.
 
@@ -93,7 +95,7 @@ python GA.py `
 
 ---
 
-### 2. `GA_pipeline.sh` — Batch Execution / 批次執行腳本
+### 2. `GA_and_Simu_Program/GA_pipeline.sh` — Batch Execution / 批次執行腳本
 
 Runs up to 6 job combinations (LOOCV / 10-Fold / 3-Fold × Sign / Unsign). By default, only LOOCV Sign + Unsign are enabled.
 
@@ -115,7 +117,7 @@ RUN_3FOLD_UNSIGN=false
 
 ---
 
-### 3. `GA_Simulation.py` — Simulation Validation / 模擬驗證腳本
+### 3. `GA_and_Simu_Program/GA_Simulation.py` — Simulation Validation / 模擬驗證腳本
 
 Validates the GA algorithm using **synthetic data** derived from real EUR/EAS AF distributions, without needing real EAS expression data.
 
@@ -138,7 +140,7 @@ python GA_Simulation.py \
 
 ---
 
-### 4. `BuildDB.py` — Build Weight Database / 建立權重資料庫
+### 4. `GA_and_Simu_Program/BuildDB.py` — Build Weight Database / 建立權重資料庫
 
 Merges per-gene `optimized_weights_detail.csv` files output by `GA.py` into a single SQLite `.db` for downstream use.
 
@@ -164,7 +166,7 @@ python BuildDB.py \
 
 ---
 
-### 5. `GeneExpression_Predict.py` / `GeneExpression_Predict.sh` — Prediction Pipeline / 預測流程
+### 5. `GA_and_Simu_Program/GeneExpression_Predict.py` / `.sh` — Prediction Pipeline / 預測流程
 
 Takes a user's VCF file and outputs predicted gene expression using GA-calibrated weights.
 
@@ -230,9 +232,9 @@ See [`data/README.md`](./data/README.md) for details.
 
 ## 📂 Prediction Results / 預測結果
 
-Test prediction results are included in this repo under the `PredictTesting/` folder:
+Test prediction results are included in this repo under [`PredictTesting/`](./PredictTesting/):
 
-測試預測結果已包含在本 repo 的 `PredictTesting/` 資料夾內：
+測試預測結果已包含在本 repo 的 [`PredictTesting/`](./PredictTesting/) 資料夾內：
 
 | File | Description |
 |---|---|
@@ -241,11 +243,55 @@ Test prediction results are included in this repo under the `PredictTesting/` fo
 
 **Status distribution in test results / 測試結果狀態：** All genes show `LOW_SNP_COVERAGE` status, indicating the test VCF only partially overlaps with the model SNPs — expected behavior for cross-cohort testing.
 
+### `predicted_predicted_expression.csv` — Column Reference / 欄位說明
+
+Wide format, one row per sample, one column per gene / 寬格式，每列一個樣本，每欄一個基因：
+
+| Column / 欄位 | Description (EN) | 說明（中文） |
+|---|---|---|
+| `FID` / `IID` | Sample ID from the VCF/plink2 | 來自 VCF/plink2 的樣本 ID |
+| `ENSG...` (one column per gene) | Predicted expression value for that sample × gene (raw scale; z-score standardize per-column yourself if needed) | 該樣本在此基因的預測表現量（原始尺度；如需標準化可自行對每欄做 z-score） |
+
+> Only genes with **at least 1 SNP found in the VCF** appear as a column here. A gene with zero SNP hits is entirely absent from this file — check its `status` in `predicted_summary.csv` (it will be `NO_SNPS_IN_VCF`).
+> 只有「至少有 1 個 SNP 在這份 VCF 中被找到」的基因才會出現在這個檔案裡；完全沒有 SNP 命中的基因不會出現，需到 `predicted_summary.csv` 查其 `status`（會是 `NO_SNPS_IN_VCF`）。
+
+### `predicted_summary.csv` — Column Reference / 欄位說明
+
+One row per gene, covering **every** gene in `weights.db` (not just successfully predicted ones) / 每列一個基因，涵蓋 `weights.db` 裡所有基因（不只是預測成功的）：
+
+| Column / 欄位 | Description (EN) | 說明（中文） |
+|---|---|---|
+| `gene` | Gene ID | 基因 ID |
+| `n_snps_in_model` | Number of non-zero-weight SNPs after GA calibration | GA 校正後、非零權重的 SNP 數 |
+| `n_snps_used` | Number of SNPs actually found in the VCF and orientation-aligned this run | 本次執行中，實際在 VCF 找到並成功對齊方向的 SNP 數 |
+| `pct_snps_used` | `n_snps_used / n_snps_in_model` — this gene's model coverage on this VCF | 此基因模型在這份 VCF 上的覆蓋率 |
+| `pred_mean` / `pred_sd` | Mean / standard deviation of predicted expression across this sample batch | 這批樣本間預測表現量的平均與標準差 |
+| `var_g` | Variance of predicted expression (`pred_sd²`); `var_g = 0` means no discriminative power in this batch | 預測表現量的變異數；`var_g = 0` 代表此基因在這批樣本裡完全沒有鑑別度 |
+| `avg_confidence_score` | Average `confidence_score` (from `BuildDB.py`) across the SNPs actually used | 實際用到的 SNP 在 `BuildDB.py` 算出的 `confidence_score` 平均值 |
+| `train_corr` / `corr_after_GA` | This gene's overall GA training/validation performance (from `final_summary.csv`) | 該基因在 GA 訓練/驗證階段的整體表現 |
+| `n_snps` | Total original SNPs used when training this gene with GA (incl. later-pruned) | 該基因 GA 訓練時使用的原始 SNP 總數（含後來被剪枝的） |
+| `status` | Quality flag for this prediction run — see table below | 本次預測的品質旗標，見下表 |
+
+**`status` values / `status` 對照：**
+
+| status | Meaning (EN) | 意義（中文） |
+|---|---|---|
+| `OK` | Normal, `n_snps_used` coverage ≥ 50% | 正常，覆蓋率 ≥ 50% |
+| `LOW_SNP_COVERAGE` | Some SNPs found but coverage < 50%; use with caution | 有找到部分 SNP，但覆蓋率 < 50%，建議謹慎使用 |
+| `NO_SNPS_IN_VCF` | None of the gene's model SNPs appear in this VCF; gene is absent from the expression CSV | 此基因的模型 SNP 完全沒有出現在這份 VCF；不會出現在表現量 CSV 裡 |
+| `NO_MODEL_SNPS` | Gene was entirely pruned during GA (`n_snps_in_model = 0`); unrelated to this VCF | 此基因在 GA 階段就被全部剪枝，跟這次 VCF 無關 |
+| `ZERO_VARIANCE` | Predicted, but identical for every sample in this batch (`var_g = 0`) | 有算出預測值，但這批樣本全部數值相同 |
+
+> Recommended: filter downstream analysis to `status == 'OK'` (optionally also `LOW_SNP_COVERAGE`) before trusting the predictions.
+> 建議下游分析先篩 `status == 'OK'`（視情況可放寬到含 `LOW_SNP_COVERAGE`）的基因再使用。
+
 ---
 
 ## 📄 Detailed Documentation / 詳細說明文件
 
-- [`GA.md`](./GA.md) — Full parameter reference and internals for `GA.py`
-- [`Simulation.md`](./Simulation.md) — Simulation design and all CLI parameters for `GA_Simulation.py`
-- [`BuildDB.md`](./BuildDB.md) — Confidence score formula, all parameters for `BuildDB.py`
-- [`GeneExpression_Predict.md`](./GeneExpression_Predict.md) — Output format spec and usage for prediction pipeline
+| Module | 中文 | English |
+|---|---|---|
+| `GA.py` | [`GA_and_Simu_Program/GA.md`](./GA_and_Simu_Program/GA.md) | [`GA_and_Simu_Program/GA.en.md`](./GA_and_Simu_Program/GA.en.md) |
+| `GA_Simulation.py` | [`GA_and_Simu_Program/Simulation.md`](./GA_and_Simu_Program/Simulation.md) | [`GA_and_Simu_Program/Simulation.en.md`](./GA_and_Simu_Program/Simulation.en.md) |
+| `BuildDB.py` | [`GA_and_Simu_Program/BuildDB.md`](./GA_and_Simu_Program/BuildDB.md) | [`GA_and_Simu_Program/BuildDB.en.md`](./GA_and_Simu_Program/BuildDB.en.md) |
+| Prediction pipeline | [`GA_and_Simu_Program/GeneExpression_Predict.md`](./GA_and_Simu_Program/GeneExpression_Predict.md) | [`GA_and_Simu_Program/GeneExpression_Predict.en.md`](./GA_and_Simu_Program/GeneExpression_Predict.en.md) |
