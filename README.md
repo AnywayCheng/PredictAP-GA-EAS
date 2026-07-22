@@ -48,6 +48,10 @@ PrediXcan models are trained on EUR GWAS/eQTL data. When applied directly to EAS
 │   ├── predicted_predicted_expression.csv
 │   └── predicted_summary.csv
 │
+├── Simulation_Result_Analysis/          # Analysis of GA_Simulation.py output (not built into weights.db)
+│   ├── Simu_Result_Analysis.ipynb      # Analysis notebook
+│   └── Simu_Result_Analysis_doc.md     # Notebook documentation
+│
 └── data/
     └── README.md                       # Notes on large data files stored on server
 ```
@@ -198,8 +202,11 @@ flowchart TD
     E --> F[GeneExpression_Predict.sh\nPrediction on new VCF]
     F --> G[predicted_expression.csv\npredicted_summary.csv]
 
-    B2[GA_Simulation.py\nSynthetic data validation] --> B
+    H[GA_Simulation.py\nSynthetic data, reuses GA.py's core GA engine] --> I[Final_Simulation_Report.csv\nSimulated_SNP_Details.csv / Tier_Summary.csv]
+    I --> J[Simulation_Result_Analysis/\nSimu_Result_Analysis.ipynb]
 ```
+
+> Note: `GA_Simulation.py` shares the same underlying GA optimization engine as `GA.py`, but its output is **never** merged into `weights.db` — it only produces validation metrics/plots, analyzed separately in [`Simulation_Result_Analysis/`](./Simulation_Result_Analysis/). Only the real-data path (`GA.py` → `BuildDB.py` → `weights.db`) feeds the prediction pipeline.
 
 ---
 
@@ -287,6 +294,7 @@ One row per gene, covering **every** gene in `weights.db` (not just successfully
 - [`GA_and_Simu_Program/Simulation.en.md`](./GA_and_Simu_Program/Simulation.en.md) — Simulation design and all CLI parameters for `GA_Simulation.py`
 - [`GA_and_Simu_Program/BuildDB.en.md`](./GA_and_Simu_Program/BuildDB.en.md) — Confidence score formula, all parameters for `BuildDB.py`
 - [`GA_and_Simu_Program/GeneExpression_Predict.en.md`](./GA_and_Simu_Program/GeneExpression_Predict.en.md) — Output format spec and usage for prediction pipeline
+- [`Simulation_Result_Analysis/Simu_Result_Analysis_doc.md`](./Simulation_Result_Analysis/Simu_Result_Analysis_doc.md) — Documentation for the `GA_Simulation.py` result analysis notebook (Chinese only)
 
 <br>
 
@@ -336,6 +344,10 @@ PrediXcan 模型以 EUR 族群的 GWAS/eQTL 資料訓練。直接套用到 EAS �
 ├── PredictTesting/                     # 測試預測結果（見下方）
 │   ├── predicted_predicted_expression.csv
 │   └── predicted_summary.csv
+│
+├── Simulation_Result_Analysis/          # GA_Simulation.py 輸出結果的分析（不會 build 進 weights.db）
+│   ├── Simu_Result_Analysis.ipynb      # 分析用 notebook
+│   └── Simu_Result_Analysis_doc.md     # notebook 技術文件
 │
 └── data/
     └── README.md                       # 大型資料檔案存放於伺服器的說明
@@ -487,8 +499,11 @@ flowchart TD
     E --> F[GeneExpression_Predict.sh\n對新 VCF 做預測]
     F --> G[predicted_expression.csv\npredicted_summary.csv]
 
-    B2[GA_Simulation.py\n合成資料驗證] --> B
+    H[GA_Simulation.py\n合成資料，沿用 GA.py 的核心 GA 引擎] --> I[Final_Simulation_Report.csv\nSimulated_SNP_Details.csv / Tier_Summary.csv]
+    I --> J[Simulation_Result_Analysis/\nSimu_Result_Analysis.ipynb]
 ```
+
+> 注意：`GA_Simulation.py` 沿用與 `GA.py` 相同的 GA 最佳化核心引擎，但其輸出**不會**被合併進 `weights.db`——它只產生驗證用的指標/圖表，另外在 [`Simulation_Result_Analysis/`](./Simulation_Result_Analysis/) 分析。只有真實資料路徑（`GA.py` → `BuildDB.py` → `weights.db`）會餵給預測流程使用。
 
 ---
 
@@ -576,3 +591,4 @@ flowchart TD
 - [`GA_and_Simu_Program/Simulation.md`](./GA_and_Simu_Program/Simulation.md) — `GA_Simulation.py` 模擬設計與所有 CLI 參數
 - [`GA_and_Simu_Program/BuildDB.md`](./GA_and_Simu_Program/BuildDB.md) — `BuildDB.py` 可信度分數公式與所有參數
 - [`GA_and_Simu_Program/GeneExpression_Predict.md`](./GA_and_Simu_Program/GeneExpression_Predict.md) — 預測流程的輸出格式規格與使用方式
+- [`Simulation_Result_Analysis/Simu_Result_Analysis_doc.md`](./Simulation_Result_Analysis/Simu_Result_Analysis_doc.md) — `GA_Simulation.py` 結果分析 notebook 的技術文件
