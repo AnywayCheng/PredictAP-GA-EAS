@@ -195,14 +195,14 @@ chmod +x GeneExpression_Predict.sh
 
 ```mermaid
 flowchart TD
-    A[Raw genotype / PrediXcan EUR weights / Real EAS expression] --> B[GA.py\nGPU-accelerated weight calibration]
-    B --> C[Per-gene optimized_weights_detail.csv]
-    C --> D[BuildDB.py\nBuild SQLite weight DB]
-    D --> E[weights.db\nwith confidence_score + allele info]
-    E --> F[GeneExpression_Predict.sh\nPrediction on new VCF]
+    A[Raw genotype\nPrediXcan EUR weights\nReal EAS expression] --> B[GA.py\nGPU-accelerated\nweight calibration]
+    B --> C[Per-gene\noptimized_weights_detail.csv]
+    C --> D[BuildDB.py\nBuild SQLite\nweight DB]
+    D --> E[weights.db\nconfidence_score\n+ allele info]
+    E --> F[GeneExpression_Predict.sh\nPrediction on\nnew VCF]
     F --> G[predicted_expression.csv\npredicted_summary.csv]
 
-    H[GA_Simulation.py\nSynthetic data, reuses GA.py's core GA engine] --> I[Final_Simulation_Report.csv\nSimulated_SNP_Details.csv / Tier_Summary.csv]
+    H[GA_Simulation.py\nSynthetic data\nreuses GA.py's\ncore GA engine] --> I[Final_Simulation_Report.csv\nSimulated_SNP_Details.csv\nTier_Summary.csv]
     I --> J[Simulation_Result_Analysis/\nSimu_Result_Analysis.ipynb]
 ```
 
@@ -492,14 +492,14 @@ chmod +x GeneExpression_Predict.sh
 
 ```mermaid
 flowchart TD
-    A[原始基因型 / PrediXcan EUR 權重 / 真實 EAS 表現量] --> B[GA.py\nGPU 加速權重校正]
-    B --> C[各基因 optimized_weights_detail.csv]
-    C --> D[BuildDB.py\n建立 SQLite 權重 DB]
-    D --> E[weights.db\n含 confidence_score + 等位基因資訊]
-    E --> F[GeneExpression_Predict.sh\n對新 VCF 做預測]
+    A[原始基因型\nPrediXcan EUR 權重\n真實 EAS 表現量] --> B[GA.py\nGPU 加速\n權重校正]
+    B --> C[各基因\noptimized_weights_detail.csv]
+    C --> D[BuildDB.py\n建立 SQLite\n權重 DB]
+    D --> E[weights.db\n含 confidence_score\n+ 等位基因資訊]
+    E --> F[GeneExpression_Predict.sh\n對新 VCF\n做預測]
     F --> G[predicted_expression.csv\npredicted_summary.csv]
 
-    H[GA_Simulation.py\n合成資料，沿用 GA.py 的核心 GA 引擎] --> I[Final_Simulation_Report.csv\nSimulated_SNP_Details.csv / Tier_Summary.csv]
+    H[GA_Simulation.py\n合成資料\n沿用 GA.py 的\n核心 GA 引擎] --> I[Final_Simulation_Report.csv\nSimulated_SNP_Details.csv\nTier_Summary.csv]
     I --> J[Simulation_Result_Analysis/\nSimu_Result_Analysis.ipynb]
 ```
 
